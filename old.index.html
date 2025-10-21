@@ -1,0 +1,140 @@
+
+
+  // function encodeWavFileFromAudioBuffer(audioBuffer) {
+  //   const numberOfChannels = audioBuffer.numberOfChannels;
+  //   const numberOfFrames = audioBuffer.length;
+  //   const sampleRate = audioBuffer.sampleRate;
+  //   const channelData = Array(numberOfChannels);
+  //   for (let channelNo = 0; channelNo < numberOfChannels; channelNo++) {
+  //     channelData[channelNo] = audioBuffer.getChannelData(channelNo);
+  //     if (channelData[channelNo].length != numberOfFrames) {
+  //       throw new Error("Unexpected channel data array size.");
+  //     }
+  //   }
+
+  //   function setString(offset, value) {
+  //     for (let p = 0; p < value.length; p++) {
+  //       dataView.setUint8(offset + p, value.charCodeAt(p));
+  //     }
+  //   }
+  //   if (numberOfChannels < 1) {
+  //     throw new Error("No audio channels.");
+  //   }
+  //   const bitsPerSample = 32;
+  //   const formatCode = 3; // WAVE_FORMAT_IEEE_FLOAT
+  //   const fmtChunkSize = 18;
+  //   const bytesPerSample = Math.ceil(bitsPerSample / 8);
+  //   const bytesPerFrame = numberOfChannels * bytesPerSample;
+  //   const bytesPerSec = sampleRate * numberOfChannels * bytesPerSample;
+  //   const headerLength = 20 + fmtChunkSize + 8;
+  //   const sampleDataLength = numberOfChannels * numberOfFrames * bytesPerSample;
+  //   const fileLength = headerLength + sampleDataLength;
+  //   const arrayBuffer = new ArrayBuffer(fileLength);
+  //   const dataView = new DataView(arrayBuffer);
+  //   setString(0, "RIFF");                                // chunk ID
+  //   dataView.setUint32(4, fileLength - 8, true);         // chunk size
+  //   setString(8, "WAVE");                                // WAVEID
+  //   setString(12, "fmt ");                               // chunk ID
+  //   dataView.setUint32(16, fmtChunkSize, true);          // chunk size
+  //   dataView.setUint16(20, formatCode, true);            // wFormatTag
+  //   dataView.setUint16(22, numberOfChannels, true);      // nChannels
+  //   dataView.setUint32(24, sampleRate, true);            // nSamplesPerSec
+  //   dataView.setUint32(28, bytesPerSec, true);           // nAvgBytesPerSec
+  //   dataView.setUint16(32, bytesPerFrame, true);         // nBlockAlign
+  //   dataView.setUint16(34, bitsPerSample, true);         // wBitsPerSample
+  //   if (fmtChunkSize > 16) {
+  //     dataView.setUint16(36, 0, true);
+  //   }                // cbSize (extension size)
+  //   const p = 20 + fmtChunkSize;
+  //   setString(p, "data");                                // chunk ID
+  //   dataView.setUint32(p + 4, sampleDataLength, true);
+
+
+  //   let offs = headerLength;
+  //   for (let frameNo = 0; frameNo < numberOfFrames; frameNo++) {
+  //     for (let channelNo = 0; channelNo < numberOfChannels; channelNo++) {
+  //       const sampleValueFloat = channelData[channelNo][frameNo];
+  //       dataView.setFloat32(offs, sampleValueFloat, true);
+  //       offs += 4;
+  //     }
+  //   }
+  //   return new Blob([dataView], { type: 'audio/wav' });
+
+  // }
+
+
+  // let audioCtx;
+
+  // // Stereo
+  // let channels = 3;
+  // let sampleRate = 3000
+
+  // function init() {
+  //   audioCtx = new AudioContext();
+  // }
+
+  // const record = () => {
+  //   if (!audioCtx) {
+  //     init();
+  //   }
+
+  //   // Create an empty two second stereo buffer at the
+  //   // sample rate of the AudioContext
+  //   const frameCount = sampleRate * 2.0;
+
+  //   const buffer = new AudioBuffer({
+  //     numberOfChannels: channels,
+  //     length: frameCount,
+  //     sampleRate: sampleRate,
+  //   });
+
+  //   // Fill the buffer with white noise;
+  //   // just random values between -1.0 and 1.0
+  //   for (let channel = 0; channel < channels; channel++) {
+  //     // This gives us the actual array that contains the data
+  //     const nowBuffering = buffer.getChannelData(channel);
+  //     for (let i = 0; i < frameCount; i++) {
+  //       // Math.random() is in [0; 1.0]
+  //       // audio needs to be in [-1.0; 1.0]
+  //       nowBuffering[i] = Math.random() * 2 - 1;
+  //     }
+  //   }
+
+  //   // Get an AudioBufferSourceNode.
+  //   // This is the AudioNode to use when we want to play an AudioBuffer
+  //   const source = audioCtx.createBufferSource();
+  //   // Set the buffer in the AudioBufferSourceNode
+  //   source.buffer = buffer;
+  //   // Connect the AudioBufferSourceNode to the
+  //   // destination so we can hear the sound
+  //   source.connect(audioCtx.destination);
+  //   // start the source playing
+  //   source.start();
+
+  //   source.onended = () => {
+  //     console.log("White noise finished.");
+  //     const wav = encodeWavFileFromAudioBuffer(buffer)
+  //     // create download link and append to Dom
+  //     const files = document.getElementById('files')
+  //     let downloadLink = document.createElement('a');
+
+  //     downloadLink.href = URL.createObjectURL(wav)
+  //     const d = new Date()
+  //     const filename = `accelerosound.${d.toISOString()}.wav`
+  //     downloadLink.text = filename
+
+
+  //     downloadLink.setAttribute('download', filename) // name file
+  //     downloadLink.removeAttribute('disabled');
+  //     downloadLink.click()
+  //     console.log("donne making audio")
+  //     const li = document.createElement("li")
+  //     li.appendChild(downloadLink)
+  //     files.prepend(li)
+
+
+
+
+
+  //   };
+  // };

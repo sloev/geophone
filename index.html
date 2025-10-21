@@ -93,6 +93,11 @@
 
     }
   }
+  const stopRecording = () => {
+    setStatus(STOPPING)
+    accelerometer && accelerometer.stop()
+    progress.innerText = "🔴"
+  }
   const startRecording = () => {
     navigator.wakeLock.request("screen")
 
@@ -208,7 +213,7 @@
       dataView.setFloat32(offs, z, true);
       offs += 4;
       frameNo += 1
-      progress.innerText= `🔴 ${frameNo/numberOfFrames} [${frameNo}/${numberOfFrames}]`
+      progress.innerText= `🔴 ${((frameNo/numberOfFrames)*100.0).toFixed(2)} [${frameNo}/${numberOfFrames}]`
       if (frameNo >= numberOfFrames) {
         return new Blob([dataView], { type: 'audio/wav' });
       }

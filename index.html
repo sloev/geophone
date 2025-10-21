@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Audio API: AudioBuffer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+
+</head>
+<style>
+  .error {
+    background-color: salmon;
+    font-weight: 700;
+  }
+
+  .files {
+    li:first-child {
+      background-color: yellow;
+    }
+
+    li {
+      background-color: transparent;
+      transition: all 1s ease-in-out;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 0;
+    }
+
+    50% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .dot {
+    animation: pulse 2s infinite;
+  }
+</style>
+
+<body>
+  <h1>Web Audio API: AudioBuffer</h1>
+  <blockquote id="error" class="error"></blockquote>
+  <button id="stopped" onclick="startRecording()">start</button>
+  <button id="recording" hidden onclick="stopRecording()">stop <span class="dot">🔴</span></button>
+  <div class="files">
+    <ul id="files">
+    </ul>
+  </div>
+</body>
+<script>
+  const stopbutton = document.getElementById("recording")
+  const recordbutton = document.getElementById("stopped")
+  const errorElement = document.getElementById("error")
+  let accelerometer
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  } else {
+    errorElement.innerText = "This page is only tested on mobile, beware!"
+  }
+  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING] = [1, 2, 3, 4]
+
+  const setStatus = (status) => {
+    switch (status) {
+      case IDLE:
+        stopbutton.removeAttribute("disabled")
+        stopbutton.setAttribute("hidden", "")
+        recordbutton.removeAttribute("disabled")
+        recordbutton.removeAttribute("hidden")
+        break;
+      case STARTING_RECORDING:
+        recordbutton.setAttribute("disabled", "")
+        break;
+      case RECORDING:
+        recordbutton.setAttribute("hidden", "")
+        stopbutton.removeAttribute("hidden")
+        break;
+      case STOPPING:
+        stopbutton.setAttribute("disabled")
+
+    }
+  }
+  const startRecording = () => {
+    setStatus(STARTING_RECORDING)
+    let writer = createwave()
+    console.log("startrecording", Accelerometer)
+    if (typeof Accelerometer !== "function") {
+      alert("you dont have  accelerometer")
+      setStatus(IDLE)
+      return
+
+    }
+    navigator.permissions.query({ name: "accelerometer" }).then((result) => {
+      if (result.state === "denied") {
+        console.log("Permission to use accelerometer sensor is denied.");
+        return;
+      }
+      accelerometer = new Accelerometer({ frequency: 60 });
+      accelerometer.addEventListener("activate", (event) => {
+        setStatus(RECORDING)
+      })
+
+      accelerometer.addEventListener("error", (event) => {
+        // Handle runtime errors.
+        if (event.error.name === "NotAllowedError") {
+          alert("please allow accelerometer!")
+          // Branch to code for requesting permission.
+        } else if (event.error.name === "NotReadableError") {
+          alert("Cannot connect to the sensor.");
+        }
+        setStatus(IDLE)
+      });
+      accelerometer.addEventListener("reading", () => {
+        console.log(`Acceleration along the X-axis ${accelerometer.x}`);
+        console.log(`Acceleration along the Y-axis ${accelerometer.y}`);
+        console.log(`Acceleration along the Z-axis ${accelerometer.z}`);
+        const wav = writer(accelerometer.x, accelerometer.y, accelerometer.z)
+        if (wav !== undefined) {
+          const files = document.getElementById('files')
+          let downloadLink = document.createElement('a');
+
+          downloadLink.href = URL.createObjectURL(wav)
+          const d = new Date()
+          const filename = `accelerosound.${d.toISOString()}.wav`
+          downloadLink.text = filename
+          downloadLink.setAttribute('download', filename) // name file
+          downloadLink.removeAttribute('disabled');
+          downloadLink.click()
+
+          const li = document.createElement("li")
+          li.appendChild(downloadLink)
+          files.prepend(li)
+
+          writer = createwave()
+        }
+      })
+    });
+  }
+  const createwave = () => {
+    const seconds = 5 // will record for 12.5 minutes to generate 5 seconds audio
+    const sampleRate = 3000
+    const numberOfChannels = 3;
+    const numberOfFrames = sampleRate * seconds;
+
+    function setString(offset, value) {
+      for (let p = 0; p < value.length; p++) {
+        dataView.setUint8(offset + p, value.charCodeAt(p));
+      }
+    }
+    if (numberOfChannels < 1) {
+      throw new Error("No audio channels.");
+    }
+    const bitsPerSample = 32;
+    const formatCode = 3; // WAVE_FORMAT_IEEE_FLOAT
+    const fmtChunkSize = 18;
+    const bytesPerSample = Math.ceil(bitsPerSample / 8);
+    const bytesPerFrame = numberOfChannels * bytesPerSample;
+    const bytesPerSec = sampleRate * numberOfChannels * bytesPerSample;
+    const headerLength = 20 + fmtChunkSize + 8;
+    const sampleDataLength = numberOfChannels * numberOfFrames * bytesPerSample;
+    const fileLength = headerLength + sampleDataLength;
+    const arrayBuffer = new ArrayBuffer(fileLength);
+    const dataView = new DataView(arrayBuffer);
+    setString(0, "RIFF");                                // chunk ID
+    dataView.setUint32(4, fileLength - 8, true);         // chunk size
+    setString(8, "WAVE");                                // WAVEID
+    setString(12, "fmt ");                               // chunk ID
+    dataView.setUint32(16, fmtChunkSize, true);          // chunk size
+    dataView.setUint16(20, formatCode, true);            // wFormatTag
+    dataView.setUint16(22, numberOfChannels, true);      // nChannels
+    dataView.setUint32(24, sampleRate, true);            // nSamplesPerSec
+    dataView.setUint32(28, bytesPerSec, true);           // nAvgBytesPerSec
+    dataView.setUint16(32, bytesPerFrame, true);         // nBlockAlign
+    dataView.setUint16(34, bitsPerSample, true);         // wBitsPerSample
+    if (fmtChunkSize > 16) {
+      dataView.setUint16(36, 0, true);
+    }                // cbSize (extension size)
+    const p = 20 + fmtChunkSize;
+    setString(p, "data");                                // chunk ID
+    dataView.setUint32(p + 4, sampleDataLength, true);
+
+
+    let offs = headerLength;
+    let frameNo = 0
+    return (x, y, z) => {
+      dataView.setFloat32(offs, x, true);
+      offs += 4;
+      dataView.setFloat32(offs, y, true);
+      offs += 4;
+      dataView.setFloat32(offs, z, true);
+      offs += 4;
+      frameNo += 1
+      if (frameNo >= numberOfFrames) {
+        return new Blob([dataView], { type: 'audio/wav' });
+      }
+    }
+  }
+
+</script>
+
+</html>

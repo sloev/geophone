@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web Audio API: AudioBuffer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-      <script src="https://sloev.github.io/infrasound/nosleep.min.js"></script>
 
+  
 </head>
 <style>
   .error {
@@ -56,7 +56,6 @@
   </div>
 </body>
 <script>
-  var noSleep = new NoSleep();
 
   const stopbutton = document.getElementById("recording")
   const progress = document.getElementById("progress")
@@ -68,6 +67,11 @@
     errorElement.innerText = "This page is only tested on mobile, beware!"
   }
   let [IDLE, STARTING_RECORDING, RECORDING, STOPPING] = [1, 2, 3, 4]
+  document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    navigator.wakeLock.request("screen")
+  }
+});
 
   const setStatus = (status) => {
     switch (status) {
@@ -90,7 +94,7 @@
     }
   }
   const startRecording = () => {
-    noSleep.enable(); // keep the screen on!
+    navigator.wakeLock.request("screen")
 
     setStatus(STARTING_RECORDING)
     let writer = createwave()

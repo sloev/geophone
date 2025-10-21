@@ -49,7 +49,7 @@
   <h1>Listen to 20hz and below with your smartphone</h1>
   <blockquote id="error" class="error"></blockquote>
   <button id="stopped" onclick="startRecording()">start</button>
-  <button id="recording" hidden onclick="stopRecording()">stop <span class="dot">🔴</span></button>
+  <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
   <div class="files">
     <ul id="files">
     </ul>
@@ -59,6 +59,7 @@
   var noSleep = new NoSleep();
 
   const stopbutton = document.getElementById("recording")
+  const progress = document.getElementById("progress")
   const recordbutton = document.getElementById("stopped")
   const errorElement = document.getElementById("error")
   let accelerometer
@@ -203,6 +204,7 @@
       dataView.setFloat32(offs, z, true);
       offs += 4;
       frameNo += 1
+      progress.innerText= `🔴 ${frameNo/numberOfFrames} [${frameNo}/${numberOfFrames}]`
       if (frameNo >= numberOfFrames) {
         return new Blob([dataView], { type: 'audio/wav' });
       }

@@ -95,11 +95,7 @@
       return
 
     }
-    navigator.permissions.query({ name: "accelerometer" }).then((result) => {
-      if (result.state === "denied") {
-        console.log("Permission to use accelerometer sensor is denied.");
-        return;
-      }
+    
       accelerometer = new Accelerometer({ frequency: 60 });
       accelerometer.addEventListener("activate", (event) => {
         setStatus(RECORDING)
@@ -108,6 +104,12 @@
       accelerometer.addEventListener("error", (event) => {
         // Handle runtime errors.
         if (event.error.name === "NotAllowedError") {
+          navigator.permissions.query({ name: "accelerometer" }).then((result) => {
+      if (result.state === "denied") {
+        console.log("Permission to use accelerometer sensor is denied.");
+        return;
+      }
+    })
           alert("please allow accelerometer!")
           // Branch to code for requesting permission.
         } else if (event.error.name === "NotReadableError") {
@@ -139,7 +141,7 @@
           writer = createwave()
         }
       })
-    });
+    
   }
   const createwave = () => {
     const seconds = 5 // will record for 12.5 minutes to generate 5 seconds audio

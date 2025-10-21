@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web Audio API: AudioBuffer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+      <script src="/nosleep.min.js"></script>
 
 </head>
 <style>
@@ -55,6 +56,8 @@
   </div>
 </body>
 <script>
+  var noSleep = new NoSleep();
+
   const stopbutton = document.getElementById("recording")
   const recordbutton = document.getElementById("stopped")
   const errorElement = document.getElementById("error")
@@ -86,6 +89,8 @@
     }
   }
   const startRecording = () => {
+    noSleep.enable(); // keep the screen on!
+
     setStatus(STARTING_RECORDING)
     let writer = createwave()
     console.log("startrecording", Accelerometer)
@@ -141,6 +146,7 @@
           writer = createwave()
         }
       })
+      accelerometer.start()
     
   }
   const createwave = () => {

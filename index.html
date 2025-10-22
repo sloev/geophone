@@ -6,13 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web Audio API: AudioBuffer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 
-  
+
 </head>
 <style>
   .error {
     background-color: salmon;
     font-weight: 700;
+  }
+
+  .error:empty {
+    display: none;
   }
 
   .files {
@@ -40,8 +45,28 @@
     }
   }
 
+  @keyframes outfader {
+    0% {
+      opacity: 1;
+    }
+
+    90% {
+      opacity: 1;
+    }
+
+
+    100% {
+      opacity: 0;
+    }
+  }
+
   .dot {
     animation: pulse 2s infinite;
+  }
+
+  .fadeout {
+    opacity: 0;
+    animation: outfader 5s 1;
   }
 </style>
 
@@ -50,6 +75,20 @@
   <blockquote id="error" class="error"></blockquote>
   <button id="stopped" onclick="startRecording()">start</button>
   <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
+  <button id="download" hidden onclick="download()">download wav</button>
+  <button id="reset" hidden onclick="reset()">reset</button>
+
+  <div id="samples"></div>
+  <svg id="charts" viewBox="0 0 500 160" class="chart">
+    <line x1="0" y1="40" x2="500" y2="40" style="stroke:rgb(160, 160, 160);stroke-width:1" />
+    <line x1="0" y1="80" x2="500" y2="80" style="stroke:rgb(160, 160, 160);stroke-width:1" />
+    <line x1="0" y1="120" x2="500" y2="120" style="stroke:rgb(160, 160, 160);stroke-width:1" />
+
+    <polyline id="xline" fill="none" stroke="#ffa500" stroke-width="0.8" points="0,40" />
+    <polyline id="yline" fill="none" stroke="#66cdaa" stroke-width="0.8" points="0,80" />
+    <polyline id="zline" fill="none" stroke="#ff1493" stroke-width="0.8" points="0,120" />
+  </svg>
+
   <div class="files">
     <ul id="files">
     </ul>
@@ -57,21 +96,140 @@
 </body>
 <script>
 
+
   const stopbutton = document.getElementById("recording")
   const progress = document.getElementById("progress")
+  const samplesElem = document.getElementById("samples")
+  const downloadButton = document.getElementById("download")
+  const resetButton = document.getElementById("reset")
+  const xline = document.getElementById("xline")
+  const charts = document.getElementById("charts")
+
   const recordbutton = document.getElementById("stopped")
   const errorElement = document.getElementById("error")
+  const sampleRateAccel = 60
+  const sampleRateWav = 3000
   let accelerometer
+  let numberOfSamples = 0
+
+  const setError = (e) => {
+    errorElement.classList.remove("fadeout");
+
+    // -> triggering reflow /* The actual magic */
+    // without this it wouldn't work. Try uncommenting the line and the transition won't be retriggered.
+    // Oops! This won't work in strict mode. Thanks Felis Phasma!
+    // element.offsetWidth = element.offsetWidth;
+    // Do this instead:
+    errorElement.innerText = e
+    errorElement.classList.add("my-class");
+    void errorElement.offsetWidth;
+
+    // -> and re-adding the class
+    errorElement.classList.add("fadeout");
+
+
+  }
+
+  const setNumberOfSamples = (n) => {
+    numberOfSamples = n
+    const recordingtime = new Date((numberOfSamples / sampleRateAccel) * 1000);
+    const recordingtimeString = `${recordingtime.toISOString().slice(11, 19)}.${String(recordingtime.getMilliseconds()).padStart(4, '0')}`
+
+    const playtime = new Date((numberOfSamples / sampleRateWav) * 1000);
+    const playtimeString = `${playtime.toISOString().slice(11, 19)}.${String(playtime.getMilliseconds()).padStart(4, '0')}`
+    samplesElem.innerHTML = `${numberOfSamples} samples<br>recording time: ${recordingtimeString}<br>_____play time: ${playtimeString}`
+  }
+  idb.openDB('infrasound', 1, {
+    upgrade(db) {
+      console.log("initialised db")
+      // Create a store of objects
+      const store = db.createObjectStore('samples', {
+        keyPath: 'timestamp'
+      });
+    },
+  }).then(async db => {
+    const n = await db.count("samples")
+    setNumberOfSamples(n)
+    setStatus(IDLE)
+    const tx = db.transaction('samples');
+
+    for await (const cursor of tx.store) {
+      const val = cursor.value
+      addPointToChart(val.x, val.y, val.z)
+    }
+    await tx.done
+    console.log("db ready with" + numberOfSamples + "samples")
+
+  }).catch(e => {
+    console.log("db error", e)
+  })
+
+  const addEntry = async (timestamp, x, y, z) => {
+    try {
+      const db = await idb.openDB('infrasound', 1)
+      await db.add('samples', { timestamp, x, y, z });
+      setNumberOfSamples(numberOfSamples + 1)
+      addPointToChart(x, y, z)
+    } catch (e) {
+      console.log("error adding entry", e)
+    }
+  }
+
+  const reset = async () => {
+    setStatus(RESETTING)
+    try {
+      const db = await idb.openDB('infrasound', 1)
+      await db.clear('samples');
+      setNumberOfSamples(0)
+      xline.points.clear();
+      xline.removeAttribute("transform")
+      yline.points.clear();
+      yline.removeAttribute("transform")
+      zline.points.clear();
+      zline.removeAttribute("transform")
+      setStatus(IDLE)
+    } catch (e) {
+      console.log("error resseting", e)
+    }
+  }
+  const addPointToChart = (x, y, z) => {
+    let transform = ""
+    const maxlen = 500
+    if (xline.points.length > maxlen) {
+
+      transform = `translate(-${xline.points.length - maxlen},0)`
+    }
+    let point = charts.createSVGPoint();
+
+    point.y = 40 + (20 * x);
+    point.x = xline.points.length;
+    xline.points.appendItem(point);
+    xline.setAttribute("transform", transform)
+
+    point = charts.createSVGPoint();
+    point.y = 80 + (20 * y);
+    point.x = xline.points.length;
+    yline.points.appendItem(point);
+    yline.setAttribute("transform", transform)
+
+    point = charts.createSVGPoint();
+    point.y = 120 + (20 * z);
+    point.x = xline.points.length;
+    zline.points.appendItem(point);
+    zline.setAttribute("transform", transform)
+  }
+
+
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
   } else {
-    errorElement.innerText = "This page is only tested on mobile, beware!"
+    setError("This page is only tested on mobile, beware!")
   }
-  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING] = [1, 2, 3, 4]
+  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING, DOWNLOADING, RESETTING] = [1, 2, 3, 4, 5, 6]
   document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    navigator.wakeLock.request("screen")
-  }
-});
+    if (document.visibilityState === 'visible') {
+      navigator.wakeLock.request("screen")
+    }
+  });
 
   const setStatus = (status) => {
     switch (status) {
@@ -80,9 +238,17 @@
         stopbutton.setAttribute("hidden", "")
         recordbutton.removeAttribute("disabled")
         recordbutton.removeAttribute("hidden")
+        if (numberOfSamples > 0) {
+          downloadButton.removeAttribute("hidden")
+          downloadButton.removeAttribute("disabled")
+          resetButton.removeAttribute("hidden")
+          resetButton.removeAttribute("disabled")
+
+        }
         break;
       case STARTING_RECORDING:
         recordbutton.setAttribute("disabled", "")
+        downloadButton.setAttribute("disabled", "")
         break;
       case RECORDING:
         recordbutton.setAttribute("hidden", "")
@@ -90,7 +256,16 @@
         break;
       case STOPPING:
         stopbutton.setAttribute("disabled")
-
+        break;
+      case DOWNLOADING:
+        downloadButton.setAttribute("disabled", "")
+        recordbutton.setAttribute("disabled", "")
+        break;
+      case RESETTING:
+        downloadButton.setAttribute("disabled", "")
+        recordbutton.setAttribute("disabled", "")
+        resetButton.setAttribute("disabled", "")
+        break;
     }
   }
   const stopRecording = () => {
@@ -102,68 +277,71 @@
     navigator.wakeLock.request("screen")
 
     setStatus(STARTING_RECORDING)
-    let writer = createwave()
     console.log("startrecording", Accelerometer)
     if (typeof Accelerometer !== "function") {
-      alert("you dont have  accelerometer")
+      setError("you dont have  accelerometer")
       setStatus(IDLE)
       return
 
     }
-    
-      accelerometer = new Accelerometer({ frequency: 60 });
-      accelerometer.addEventListener("activate", (event) => {
-        setStatus(RECORDING)
-      })
+    addEntry(new Date().getTime(), Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1)
 
-      accelerometer.addEventListener("error", (event) => {
-        // Handle runtime errors.
-        if (event.error.name === "NotAllowedError") {
-          navigator.permissions.query({ name: "accelerometer" }).then((result) => {
-      if (result.state === "denied") {
-        console.log("Permission to use accelerometer sensor is denied.");
-        return;
-      }
+    accelerometer = new LinearAccelerationSensor({ frequency: sampleRateAccel });
+    accelerometer.addEventListener("activate", (event) => {
+      setStatus(RECORDING)
     })
-          alert("please allow accelerometer!")
-          // Branch to code for requesting permission.
-        } else if (event.error.name === "NotReadableError") {
-          alert("Cannot connect to the sensor.");
-        }
-        setStatus(IDLE)
-      });
-      accelerometer.addEventListener("reading", () => {
-        console.log(`Acceleration along the X-axis ${accelerometer.x}`);
-        console.log(`Acceleration along the Y-axis ${accelerometer.y}`);
-        console.log(`Acceleration along the Z-axis ${accelerometer.z}`);
-        const wav = writer(accelerometer.x, accelerometer.y, accelerometer.z)
-        if (wav !== undefined) {
-          const files = document.getElementById('files')
-          let downloadLink = document.createElement('a');
 
-          downloadLink.href = URL.createObjectURL(wav)
-          const d = new Date()
-          const filename = `accelerosound.${d.toISOString()}.wav`
-          downloadLink.text = filename
-          downloadLink.setAttribute('download', filename) // name file
-          downloadLink.removeAttribute('disabled');
-          downloadLink.click()
-
-          const li = document.createElement("li")
-          li.appendChild(downloadLink)
-          files.prepend(li)
-
-          writer = createwave()
-        }
-      })
-      accelerometer.start()
-    
+    accelerometer.addEventListener("error", (event) => {
+      // Handle runtime errors.
+      if (event.error.name === "NotAllowedError") {
+        navigator.permissions.query({ name: "accelerometer" }).then((result) => {
+          if (result.state === "denied") {
+            console.log("Permission to use accelerometer sensor is denied.");
+            return;
+          }
+        })
+        // Branch to code for requesting permission.
+      } else if (event.error.name === "NotReadableError") {
+        setError("Cannot connect to the sensor");
+      }
+      setStatus(IDLE)
+    });
+    accelerometer.addEventListener("reading", (e) => {
+      addEntry(e.timeStamp, accelerometer.x, accelerometer.y, accelerometer.z)
+    })
+    accelerometer.start()
   }
-  const createwave = () => {
-    const seconds = 5 // will record for 12.5 minutes to generate 5 seconds audio
-    const sampleRate = 3000
+
+  const download = async () => {
+    setStatus(DOWNLOADING)
+    const db = await idb.openDB('infrasound', 1)
+    const numberOfSamples = await db.count("samples")
+    const tx = db.transaction('samples');
+
+    const writer = createwave(numberOfSamples)
+    let wav
+    for await (const cursor of tx.store) {
+      const val = cursor.value
+      console.log(val.timestamp)
+      wav = writer(val.x, val.y, val.z)
+    }
+    await tx.done
+    let downloadLink = document.createElement('a');
+
+    downloadLink.href = URL.createObjectURL(wav)
+    const d = new Date()
+    const filename = `accelerosound.${d.toISOString()}.wav`
+    downloadLink.text = filename
+    downloadLink.setAttribute('download', filename) // name file
+    downloadLink.removeAttribute('disabled');
+    downloadLink.click()
+    setStatus(IDLE)
+
+  }
+
+  const createwave = (numberOfFrames) => {
+    const sampleRate = sampleRateWav
     const numberOfChannels = 3;
-    const numberOfFrames = sampleRate * seconds;
 
     function setString(offset, value) {
       for (let p = 0; p < value.length; p++) {
@@ -206,14 +384,14 @@
     let offs = headerLength;
     let frameNo = 0
     return (x, y, z) => {
-      dataView.setFloat32(offs, x, true);
+      dataView.setFloat32(offs, Math.fround(x), true);
       offs += 4;
-      dataView.setFloat32(offs, y, true);
+      dataView.setFloat32(offs, Math.fround(y), true);
       offs += 4;
-      dataView.setFloat32(offs, z, true);
+      dataView.setFloat32(offs, Math.fround(z), true);
       offs += 4;
       frameNo += 1
-      progress.innerText= `🔴 ${((frameNo/numberOfFrames)*100.0).toFixed(2)} [${frameNo}/${numberOfFrames}]`
+      progress.innerText = `🔴 ${((frameNo / numberOfFrames) * 100.0).toFixed(2)}% [${frameNo}/${numberOfFrames}]`
       if (frameNo >= numberOfFrames) {
         return new Blob([dataView], { type: 'audio/wav' });
       }

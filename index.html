@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Audio API: AudioBuffer</title>
+  <title>GEOPHONE</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 
@@ -71,7 +71,7 @@
 </style>
 
 <body>
-  <h1>Listen to 20hz and below with your smartphone</h1>
+  <h1>Use your smartphone as a geophone!</h1>
   <blockquote id="error" class="error"></blockquote>
   <button id="stopped" onclick="startRecording()">start</button>
   <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
@@ -95,7 +95,17 @@
   </div>
 </body>
 <script>
+var noSleep = new NoSleep();
 
+function enableNoSleep() {
+  noSleep.enable();
+  navigator.wakeLock.request("screen")
+  document.removeEventListener('touchstart', enableNoSleep, false);
+}
+
+// Enable wake lock.
+// (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+document.addEventListener('touchstart', enableNoSleep, false);
 
   const stopbutton = document.getElementById("recording")
   const progress = document.getElementById("progress")
@@ -255,7 +265,7 @@
         stopbutton.removeAttribute("hidden")
         break;
       case STOPPING:
-        stopbutton.setAttribute("disabled")
+        stopbutton.setAttribute("disabled", "")
         break;
       case DOWNLOADING:
         downloadButton.setAttribute("disabled", "")
@@ -274,7 +284,6 @@
     progress.innerText = "🔴"
   }
   const startRecording = () => {
-    navigator.wakeLock.request("screen")
 
     setStatus(STARTING_RECORDING)
     console.log("startrecording", Accelerometer)

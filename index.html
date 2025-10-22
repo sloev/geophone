@@ -196,7 +196,7 @@
   })
 
   const addEntry = async (timestamp, xr, yr, zr) => {
-    max_seen_speed = max(max_seen_speed, max(Math.abs(x), max(Math.abs(y),Math.abs(z))))
+    max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(x), Math.max(Math.abs(y),Math.abs(z))))
 
     const x = mapRange(xr, -max_speed, max_speed, -1, 1)
     const y = mapRange(yr, -max_speed, max_speed, -1, 1)

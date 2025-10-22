@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GEOPHONE</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 
 
@@ -77,6 +77,8 @@
   <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
   <button id="download" hidden onclick="download()">download wav</button>
   <button id="reset" hidden onclick="reset()">reset</button>
+  <blockquote id="loading" class="dot">loading...</blockquote>
+
 
   <div id="samples"></div>
   <svg id="charts" viewBox="0 0 500 160" class="chart">
@@ -115,6 +117,7 @@
   const samplesElem = document.getElementById("samples")
   const downloadButton = document.getElementById("download")
   const resetButton = document.getElementById("reset")
+  const loadingElem = document.getElementById("loading")
   const xline = document.getElementById("xline")
   const yline = document.getElementById("yline")
   const zline = document.getElementById("zline")
@@ -166,9 +169,10 @@
       });
     },
   }).then(async db => {
+        setStatus(LOADING)
+
     const n = await db.count("samples")
     setNumberOfSamples(n)
-    setStatus(IDLE)
     const tx = db.transaction('samples');
 
     const points = []
@@ -184,6 +188,8 @@
       addPointToChart(val.x, val.y, val.z)
     })
     console.log("db ready with" + numberOfSamples + "samples")
+        setStatus(IDLE)
+
 
   }).catch(e => {
     console.log("db error", e)
@@ -259,15 +265,22 @@
   } else {
     setError("This page is only tested on mobile, beware!")
   }
-  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING, DOWNLOADING, RESETTING] = [1, 2, 3, 4, 5, 6]
+  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING, DOWNLOADING, RESETTING, LOADING] = [1, 2, 3, 4, 5, 6, 7]
 
   const setStatus = (status) => {
     switch (status) {
+      case LOADING:
+        stopbutton.setAttribute("disabled", "")
+        recordbutton.setAttribute("disabled", "")
+        downloadButton.setAttribute("disabled", "")
+        loadingElem.removeAttribute("hidden")
       case IDLE:
         stopbutton.removeAttribute("disabled")
         stopbutton.setAttribute("hidden", "")
         recordbutton.removeAttribute("disabled")
         recordbutton.removeAttribute("hidden")
+        loadingElem.setAttribute("hidden", "")
+
         if (numberOfSamples > 0) {
           downloadButton.removeAttribute("hidden")
           downloadButton.removeAttribute("disabled")

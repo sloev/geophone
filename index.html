@@ -99,7 +99,8 @@
   var noSleep = new NoSleep();
   let pointsaddedtochart = 0
   const maxpointsinchart = 500
-  const max_speed = 9.81 * 2 // 2g
+  const max_speed = 9.81 * 3 // 3g
+  let max_seen_speed = 0
   function enableNoSleep() {
     noSleep.enable();
     document.removeEventListener('touchstart', enableNoSleep, false);
@@ -189,6 +190,8 @@
   })
 
   const addEntry = async (timestamp, xr, yr, zr) => {
+    max_seen_speed = max(max_seen_speed, max(Math.abs(x), max(Math.abs(y),Math.abs(z))))
+
     const x = mapRange(xr, -max_speed, max_speed, -1, 1)
     const y = mapRange(yr, -max_speed, max_speed, -1, 1)
     const z = mapRange(zr, -max_speed, max_speed, -1, 1)
@@ -232,19 +235,19 @@
     }
     let point = charts.createSVGPoint();
 
-    point.y = 40 + (20 * x);
+    point.y = 40 + (40 * x);
     point.x = pointsaddedtochart;
     xline.points.appendItem(point);
     xline.setAttribute("transform", transform)
 
     point = charts.createSVGPoint();
-    point.y = 80 + (20 * y);
+    point.y = 80 + (40 * y);
     point.x = pointsaddedtochart;
     yline.points.appendItem(point);
     yline.setAttribute("transform", transform)
 
     point = charts.createSVGPoint();
-    point.y = 120 + (20 * z);
+    point.y = 120 + (40 * z);
     point.x = pointsaddedtochart;
     zline.points.appendItem(point);
     zline.setAttribute("transform", transform)

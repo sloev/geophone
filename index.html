@@ -113,6 +113,8 @@ document.addEventListener('touchstart', enableNoSleep, false);
   const downloadButton = document.getElementById("download")
   const resetButton = document.getElementById("reset")
   const xline = document.getElementById("xline")
+  const yline = document.getElementById("yline")
+  const zline = document.getElementById("zline")
   const charts = document.getElementById("charts")
 
   const recordbutton = document.getElementById("stopped")
@@ -208,6 +210,10 @@ document.addEventListener('touchstart', enableNoSleep, false);
     if (xline.points.length > maxlen) {
 
       transform = `translate(-${xline.points.length - maxlen},0)`
+          xline.points.removeItem(0);
+          yline.points.removeItem(0);
+          zline.points.removeItem(0);
+
     }
     let point = charts.createSVGPoint();
 

@@ -189,9 +189,9 @@
   })
 
   const addEntry = async (timestamp, xr, yr, zr) => {
-    const x = mapRange(x, -max_speed, max_speed, -1, 1)
-    const y = mapRange(y, -max_speed, max_speed, -1, 1)
-    const z = mapRange(z, -max_speed, max_speed, -1, 1)
+    const x = mapRange(xr, -max_speed, max_speed, -1, 1)
+    const y = mapRange(yr, -max_speed, max_speed, -1, 1)
+    const z = mapRange(zr, -max_speed, max_speed, -1, 1)
     try {
       const db = await idb.openDB('infrasound', 1)
       await db.add('samples', { timestamp, x, y, z });

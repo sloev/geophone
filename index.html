@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GEOPHONE</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
   <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 
 
@@ -77,7 +77,7 @@
   <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
   <button id="download" hidden onclick="download()">download wav</button>
   <button id="reset" hidden onclick="reset()">reset</button>
-  <blockquote id="loading" class="dot">loading...</blockquote>
+  <blockquote id="loading">loading...</blockquote>
 
 
   <div id="samples"></div>
@@ -130,8 +130,8 @@
   let accelerometer
   let numberOfSamples = 0
   function mapRange(value, oldMin, oldMax, newMin, newMax) {
-  return ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin)) + newMin;
-}
+    return ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin)) + newMin;
+  }
 
   const setError = (e) => {
     errorElement.classList.remove("fadeout");
@@ -169,7 +169,7 @@
       });
     },
   }).then(async db => {
-        setStatus(LOADING)
+    setStatus(LOADING)
 
     const n = await db.count("samples")
     setNumberOfSamples(n)
@@ -179,6 +179,8 @@
 
     for await (const cursor of tx.store) {
       const val = cursor.value
+          max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(val.x), Math.max(Math.abs(val.y), Math.abs(val.z))))
+
       points.push(val)
 
     }
@@ -188,7 +190,7 @@
       addPointToChart(val.x, val.y, val.z)
     })
     console.log("db ready with" + numberOfSamples + "samples")
-        setStatus(IDLE)
+    setStatus(IDLE)
 
 
   }).catch(e => {
@@ -196,7 +198,7 @@
   })
 
   const addEntry = async (timestamp, xr, yr, zr) => {
-    max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(x), Math.max(Math.abs(y),Math.abs(z))))
+    max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(xr), Math.max(Math.abs(yr), Math.abs(zr))))
 
     const x = mapRange(xr, -max_speed, max_speed, -1, 1)
     const y = mapRange(yr, -max_speed, max_speed, -1, 1)

@@ -6,7 +6,9 @@ const max_speed = 9.81 // 3g
 const debug = /[?&]debug=/.test(location.search)
 
 
-let max_seen_speed = 1
+let max_seen_speedx = 0.1
+let max_seen_speedy = 0.1
+let max_seen_speedz = 0.1
 let ringbuffer = []
 function enableNoSleep() {
     console.log("no sleep enabled")
@@ -92,8 +94,9 @@ idb.openDB('geophone', 1, {
 
     for await (const cursor of tx.store) {
         const val = cursor.value
-        max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(val.x), Math.max(Math.abs(val.y), Math.abs(val.z))))
-
+        max_seen_speedx = Math.max(max_seen_speedx, val.x)
+        max_seen_speedy = Math.max(max_seen_speedy, val.y)
+        max_seen_speedz = Math.max(max_seen_speedz, val.z)
         points.push(val)
 
     }
@@ -111,10 +114,14 @@ idb.openDB('geophone', 1, {
 })
 
 const addEntry = async (timestamp, x, y, z) => {
-    max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(z))))
+
+
     ringbuffer.push({ timestamp, x, y, z })
     if (ringbuffer.length > sampleRateAccel * graceperiodSeconds) {
         const item = ringbuffer.shift()
+        max_seen_speedx = Math.max(max_seen_speedx, item.x)
+        max_seen_speedy = Math.max(max_seen_speedy, item.y)
+        max_seen_speedz = Math.max(max_seen_speedz, item.z)
         try {
             const db = await idb.openDB('geophone', 1)
             await db.add('samples', item);
@@ -139,7 +146,10 @@ const reset = async () => {
         yline.removeAttribute("transform")
         zline.points.clear();
         zline.removeAttribute("transform")
-        max_seen_speed = 0
+        max_seen_speedx = 0.1
+        max_seen_speedy = 0.1
+        max_seen_speedz = 0.1
+
         pointsaddedtochart = 0
 
         setStatus(IDLE)
@@ -150,9 +160,9 @@ const reset = async () => {
 
 
 const addPointToChart = (xr, yr, zr) => {
-    const x = mapRange(xr, -max_seen_speed, max_seen_speed, -1, 1)
-    const y = mapRange(yr, -max_seen_speed, max_seen_speed, -1, 1)
-    const z = mapRange(zr, -max_seen_speed, max_seen_speed, -1, 1)
+    const x = mapRange(xr, -max_seen_speedx, max_seen_speedx, -1, 1)
+    const y = mapRange(yr, -max_seen_speedy, max_seen_speedy, -1, 1)
+    const z = mapRange(zr, -max_seen_speedz, max_seen_speedz, -1, 1)
     let transform = ""
     if (pointsaddedtochart > maxpointsinchart) {
         transform = `translate(-${pointsaddedtochart - maxpointsinchart},0)`
@@ -198,20 +208,20 @@ monotoggle.addEventListener('change', (event) => {
 // javascript
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+    e.preventDefault();
+    deferredPrompt = e;
 });
 
 // javascript
 const installApp = document.getElementById('installApp');
 installApp.addEventListener('click', async () => {
-  if (deferredPrompt !== null) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      deferredPrompt = null;
+    if (deferredPrompt !== null) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            deferredPrompt = null;
+        }
     }
-  }
 });
 let [IDLE, STARTING_RECORDING, RECORDING, STOPPING, GENERATING, RESETTING, LOADING] = [1, 2, 3, 4, 5, 6, 7]
 
@@ -386,9 +396,9 @@ const generate = async () => {
     const writer = createwave(monotoggle.checked, numberOfSamples)
     for await (const cursor of tx.store) {
         const val = cursor.value
-        const x = mapRange(val.x, -max_seen_speed, max_seen_speed, -0.95, 0.95)
-        const y = mapRange(val.y, -max_seen_speed, max_seen_speed, -0.95, 0.95)
-        const z = mapRange(val.z, -max_seen_speed, max_seen_speed, -0.95, 0.95)
+        const x = mapRange(val.x, -max_seen_speedx, max_seen_speedx, -0.95, 0.95)
+        const y = mapRange(val.y, -max_seen_speedy, max_seen_speedy, -0.95, 0.95)
+        const z = mapRange(val.z, -max_seen_speedz, max_seen_speedz, -0.95, 0.95)
         wav = writer(x, y, z)
     }
     await tx.done
@@ -462,7 +472,8 @@ const createwave = (mono, numberOfFrames) => {
     let frameNo = 0
     return (x, y, z) => {
         if (mono) {
-            dataView.setFloat32(offs, Math.fround(x), true);
+            const val = (x+y+z)/3.0
+            dataView.setFloat32(offs, Math.fround(val), true);
             offs += 4;
         } else {
             dataView.setFloat32(offs, Math.fround(x), true);

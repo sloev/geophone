@@ -25,7 +25,12 @@
   <details> <summary>What is geophone?</summary>
     <button id="installApp">Install Geophone as an app</button>
     <p>This is an app that lets you record the data from your smartphone accellerometer and listen to it</p>
-    <p>You have the option to choose whether to download the .wav file as a downmixed mono signal or a 3 channel raw recording.</p>
+        <p>You have the option to choose whether to download the .wav file as a downmixed mono signal or a 3 channel raw recording.</p>
+
+        <p>It can sound like this recording of me drumming on the sofa:</p>
+
+        <audio src="./static/example.wav" loop controls></audio>
+
     <p>if you use geophone a lot consider <a href="https://buymeacoffee.com/sloev">donating to the author</a>.</p>
     <ul>
       <li><a href="https://en.wikipedia.org/wiki/Geophone">geophone wiki</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/LinearAccelerationSensor">browser accellerometer</a></li></ul>
@@ -45,7 +50,7 @@
     <button class="primary" disabled id="generate" onclick="generate()">generate ⚙️</button>
     <button hidden class="alternate" id="download" onclick="download()">download ⬇️</button>
     <br>
-    <audio id="audio" style="visibility: hidden;" src="" width="100%" controls></audio>
+    <audio id="audio" style="visibility: hidden;" src=""  controls></audio>
 
   </div>
   <blockquote id="loading"><span class="dot">...LOADING...</span></blockquote>

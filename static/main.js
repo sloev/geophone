@@ -41,7 +41,7 @@ const recordbutton = document.getElementById("stopped")
 const errorElement = document.getElementById("error")
 const sampleRateAccel = 60
 const graceperiodSeconds = 5
-const sampleRateWav = 3000
+const sampleRateWav = 8200
 let accelerometer
 let numberOfSamples = 0
 let wav = undefined

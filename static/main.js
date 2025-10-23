@@ -243,6 +243,8 @@ const setStatus = (status) => {
             stopbutton.setAttribute("hidden", "")
             recordbutton.removeAttribute("disabled")
             recordbutton.removeAttribute("hidden")
+            resetButton.removeAttribute("disabled")
+
             loadingElem.classList.add("fadeoutfast");
 
 
@@ -280,7 +282,6 @@ const setStatus = (status) => {
         case RECORDING:
             recordbutton.setAttribute("hidden", "")
             stopbutton.removeAttribute("hidden")
-            resetButton.removeAttribute("disabled")
             break;
         case STOPPING:
             stopbutton.setAttribute("disabled", "")
@@ -472,7 +473,7 @@ const createwave = (mono, numberOfFrames) => {
     let frameNo = 0
     return (x, y, z) => {
         if (mono) {
-            const val = (x+y+z)/3.0
+            const val = (x + y + z) / 3.0
             dataView.setFloat32(offs, Math.fround(val), true);
             offs += 4;
         } else {

@@ -3,150 +3,51 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GEOPHONE</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-  <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
-
-
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" type="text/css" href="./static/water.css">
+  <link rel="stylesheet" type="text/css" href="./static/main.css">
+  <link rel="icon" href="./static/icons/icon-48x48.png" type="image/png" />
+  <script src="./static/idb.js"></script>
+  <script src="./static/nosleep.js"></script>
 </head>
-<style>
-  .error {
-    background-color: salmon;
-    font-weight: 700;
-  }
 
-  .error:empty {
-    display: none;
-  }
-
-
-  @keyframes pulse {
-    0% {
-      opacity: 0;
-    }
-
-    50% {
-      opacity: 1;
-    }
-
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes outfader {
-    0% {
-      opacity: 1;
-    }
-
-    90% {
-      opacity: 1;
-    }
-
-
-    100% {
-      opacity: 0;
-    }
-  }
-
-  .dot {
-    animation: pulse 2s infinite;
-  }
-
-  .fadeout {
-    opacity: 0;
-    animation: outfader 5s 1;
-
-  }
-
-  .fadeoutfast {
-    opacity: 0;
-    animation: outfader 1s 1;
-
-  }
-
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 100px;
-    height: 34px;
-  }
-
-  .switch input {
-    display: none;
-  }
-
-  .toggle {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #d36e98;
-    -webkit-transition: .4s;
-    transition: .4s;
-    border-radius: 34px;
-  }
-
-  .toggle:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-    border-radius: 50%;
-  }
-
-  input:checked+.toggle {
-    background-color: #aaca60;
-  }
-
-  input:focus+.toggle {
-    box-shadow: 0 0 1px #2196F3;
-  }
-
-  input:checked+.toggle:before {
-    -webkit-transform: translateX(65px);
-    -ms-transform: translateX(65px);
-    transform: translateX(65px);
-  }
-
-  /*------ CSS to change text with transform animation ---------*/
-  .toggle:after {
-    content: 'RAW';
-    color: white;
-    display: block;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    left: 50%;
-    font-size: 10px;
-    font-family: Verdana, sans-serif;
-    font-weight: 700;
-  }
-
-  input:checked+.toggle:after {
-    content: 'MONO';
-  }
-</style>
 
 <body>
-  <h1>Use your smartphone as a geophone!</h1>
+  <span>(◟ᅇ)◜ &nbsp;<i><a href="https://supernihil.buro.earth/"> supernihil</a> and <a href="https://buro.earth">radio
+        BURO</a> presents:</i>&nbsp;ヅ</span>
+  <br>
+
+  <span class="headertext"
+    style='font-family: "Lucida Console";line-height: 14px;font-size: 14px;display: inline-block;'>▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄<br>██░▄▄░██░▄▄▄██░▄▄▄░██░▄▄░██░██░██░▄▄▄░██░▀██░██░▄▄▄██<br>██░█▀▀██░▄▄▄██░███░██░▀▀░██░▄▄░██░███░██░█░█░██░▄▄▄██<br>██░▀▀▄██░▀▀▀██░▀▀▀░██░█████░██░██░▀▀▀░██░██▄░██░▀▀▀██<br>▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀<br></span><br>
   <blockquote id="error" class="error"></blockquote>
-  <button id="stopped" onclick="startRecording()">start</button>
-  <button id="recording" hidden onclick="stopRecording()">stop <span class="dot" id="progress">🔴</span></button>
-  <button id="reset" disabled onclick="reset()">reset</button>
-  <button disabled id="download" onclick="download()">download</button>
-  <label class="switch">
-    <input type="checkbox" checked id="mono">
-    <div class="toggle round"></div>
-  </label>
+  <details> <summary>What is this?</summary>
+    <button id="installApp">Install Geophone as an app</button>
+    <p>This is an app that lets you record the data from your smartphone accellerometer and listen to it</p>
+    <p>You have the option to choose whether to download the .wav file as a downmixed mono signal or a 3 channel raw recording.</p>
+    <p>if you use geophone a lot consider <a href="https://buymeacoffee.com/sloev">donating to the author</a>.</p>
+    <ul>
+      <li><a href="https://en.wikipedia.org/wiki/Geophone">geophone wiki</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/LinearAccelerationSensor">browser accellerometer</a></li></ul>
+  </details>
+
+  <div class="controls"><button id="stopped" class="primary" onclick="startRecording()">record&nbsp;&nbsp;<span
+        id="progress">🔴</span></button>
+    <button id="recording" class="alternate" hidden onclick="stopRecording()">stop&nbsp;&nbsp;<span
+        class="dot">🔴</span></button>
+    <button id="reset" disabled onclick="reset()">reset</button>
+    <br>
+
+    <label class="switch">
+      <input type="checkbox" checked id="mono">
+      <div class="toggle round"></div>
+    </label>
+    <button class="primary" disabled id="generate" onclick="generate()">generate ⚙️</button>
+    <button hidden class="alternate" id="download" onclick="download()">download ⬇️</button>
+    <br>
+    <audio id="audio" style="visibility: hidden;" src="" width="100%" controls></audio>
+
+  </div>
   <blockquote id="loading"><span class="dot">...LOADING...</span></blockquote>
 
 
@@ -167,6 +68,8 @@
 
     </tbody>
   </table>
+
+
   <svg id="charts" viewBox="0 0 500 160" class="chart">
     <line x1="0" y1="40" x2="500" y2="40" style="stroke:rgb(160, 160, 160);stroke-width:1" />
     <line x1="0" y1="80" x2="500" y2="80" style="stroke:rgb(160, 160, 160);stroke-width:1" />
@@ -178,377 +81,6 @@
   </svg>
 
 </body>
-<script>
-  const webm = "data:video/webm;base64,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"; const mp4 = "data:video/mp4;base64,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"; class NoSleepSSR { enabled = false; enable() { throw new Error("NoSleep using SSR/no-op mode; do not call enable.") } disable() { throw new Error("NoSleep using SSR/no-op mode; do not call disable.") } } class NoSleepNative { enabled = false; constructor() { const handleVisibilityChange = () => this.wakeLock && document.visibilityState === "visible" && this.enable(); document.addEventListener("visibilitychange", handleVisibilityChange); document.addEventListener("fullscreenchange", handleVisibilityChange) } async enable() { try { this.wakeLock = await navigator.wakeLock.request("screen"); this.enabled = true; console.debug("Wake Lock active."); this.wakeLock.addEventListener("release", () => { console.debug("Wake Lock released.") }) } catch (err) { this.enabled = false; if (err instanceof Error) { console.error(`${err.name}, ${err.message}`) } } } disable() { this.wakeLock?.release(); this.wakeLock = undefined; this.enabled = false } } class NoSleepVideo { enabled = false; constructor() { this.noSleepVideo = document.createElement("video"); this.noSleepVideo.setAttribute("title", "No Sleep"); this.noSleepVideo.setAttribute("playsinline", ""); this._addSourceToVideo(this.noSleepVideo, "webm", webm); this._addSourceToVideo(this.noSleepVideo, "mp4", mp4); Object.assign(this.noSleepVideo.style, { position: "absolute", left: "-100%", top: "-100%" }); document.querySelector("body")?.append(this.noSleepVideo); this.noSleepVideo.addEventListener("loadedmetadata", () => { if (this.noSleepVideo.duration <= 1) { this.noSleepVideo.setAttribute("loop", "") } else { this.noSleepVideo.addEventListener("timeupdate", () => { if (this.noSleepVideo.currentTime > 0.5) { this.noSleepVideo.currentTime = Math.random() } }) } }) } _addSourceToVideo(element, type, dataURI) { const source = document.createElement("source"); source.src = dataURI; source.type = `video/${type}`; element.appendChild(source) } async enable() { const playPromise = this.noSleepVideo.play(); try { const res = await playPromise; this.enabled = true; return res } catch (err) { this.enabled = false; if (err instanceof Error) { console.error(`${err.name}, ${err.message}`) } } } disable() { this.noSleepVideo.pause(); this.enabled = false } } const NoSleep = typeof navigator === "undefined" ? NoSleepSSR : "wakeLock" in navigator && !navigator.standalone ? NoSleepNative : NoSleepVideo;
-  var noSleep = new NoSleep();
-  let pointsaddedtochart = 0
-  const maxpointsinchart = 500
-  const max_speed = 9.81 // 3g
-
-  let max_seen_speed = 1
-  function enableNoSleep() {
-    noSleep.enable();
-    document.removeEventListener('touchstart', enableNoSleep, false);
-  }
-
-  // Enable wake lock.
-  // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
-  document.addEventListener('touchstart', enableNoSleep, false);
-  const samplingrow = document.getElementById("samplingrow")
-  const samplesrow = document.getElementById("samplesrow")
-  const recordingrow = document.getElementById("recordingrow")
-
-  const monotoggle = document.getElementById("mono")
-  const stopbutton = document.getElementById("recording")
-  const progress = document.getElementById("progress")
-
-  const downloadButton = document.getElementById("download")
-  const resetButton = document.getElementById("reset")
-  const loadingElem = document.getElementById("loading")
-  const xline = document.getElementById("xline")
-  const yline = document.getElementById("yline")
-  const zline = document.getElementById("zline")
-  const charts = document.getElementById("charts")
-
-  const recordbutton = document.getElementById("stopped")
-  const errorElement = document.getElementById("error")
-  const sampleRateAccel = 60
-  const sampleRateWav = 3000
-  let accelerometer
-  let numberOfSamples = 0
-  function mapRange(value, oldMin, oldMax, newMin, newMax) {
-    return ((value - oldMin) * (newMax - newMin) / (oldMax - oldMin)) + newMin;
-  }
-
-  const setError = (e) => {
-    errorElement.classList.remove("fadeout");
-
-    // -> triggering reflow /* The actual magic */
-    // without this it wouldn't work. Try uncommenting the line and the transition won't be retriggered.
-    // Oops! This won't work in strict mode. Thanks Felis Phasma!
-    // element.offsetWidth = element.offsetWidth;
-    // Do this instead:
-    errorElement.innerText = e
-    void errorElement.offsetWidth;
-
-    // -> and re-adding the class
-    errorElement.classList.add("fadeout");
-
-
-  }
-
-  const setNumberOfSamples = (n) => {
-    numberOfSamples = n
-    const recordingtime = new Date((numberOfSamples / sampleRateAccel) * 1000);
-    samplingrow.innerText = `${recordingtime.toISOString().slice(11, 19)}.${String(recordingtime.getMilliseconds()).padStart(4, '0')}`
-
-    const playtime = new Date((numberOfSamples / sampleRateWav) * 1000);
-    recordingrow.innerText = `${playtime.toISOString().slice(11, 19)}.${String(playtime.getMilliseconds()).padStart(4, '0')}`
-    samplesrow.innerText = `${numberOfSamples}`
-  }
-  idb.openDB('infrasound', 1, {
-    upgrade(db) {
-      console.log("initialised db")
-      // Create a store of objects
-      const store = db.createObjectStore('samples', {
-        keyPath: 'timestamp'
-      });
-    },
-  }).then(async db => {
-    setStatus(LOADING)
-
-    const n = await db.count("samples")
-    setNumberOfSamples(n)
-    const tx = db.transaction('samples');
-
-    const points = []
-
-    for await (const cursor of tx.store) {
-      const val = cursor.value
-      max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(val.x), Math.max(Math.abs(val.y), Math.abs(val.z))))
-
-      points.push(val)
-
-    }
-    await tx.done
-
-    points.slice(points.length - maxpointsinchart).map(val => {
-      addPointToChart(val.x, val.y, val.z)
-    })
-    console.log("db ready with" + numberOfSamples + "samples")
-    setTimeout(() => {
-      setStatus(IDLE)
-    }, 500);
-  }).catch(e => {
-    console.log("db error", e)
-  })
-
-  const addEntry = async (timestamp, x, y, z) => {
-    max_seen_speed = Math.max(max_seen_speed, Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(z))))
-
-
-    try {
-      const db = await idb.openDB('infrasound', 1)
-      await db.add('samples', { timestamp, x, y, z });
-      setNumberOfSamples(numberOfSamples + 1)
-      addPointToChart(x, y, z)
-    } catch (e) {
-      console.log("error adding entry", e)
-    }
-  }
-
-  const reset = async () => {
-    setStatus(RESETTING)
-    try {
-      const db = await idb.openDB('infrasound', 1)
-      await db.clear('samples');
-      setNumberOfSamples(0)
-      xline.points.clear();
-      xline.removeAttribute("transform")
-      yline.points.clear();
-      yline.removeAttribute("transform")
-      zline.points.clear();
-      zline.removeAttribute("transform")
-      max_seen_speed = 0
-      pointsaddedtochart = 0
-
-      setStatus(IDLE)
-    } catch (e) {
-      console.log("error resseting", e)
-    }
-  }
-
-
-  const addPointToChart = (xr, yr, zr) => {
-    const x = mapRange(xr, -max_seen_speed, max_seen_speed, -1, 1)
-    const y = mapRange(yr, -max_seen_speed, max_seen_speed, -1, 1)
-    const z = mapRange(zr, -max_seen_speed, max_seen_speed, -1, 1)
-    let transform = ""
-    if (pointsaddedtochart > maxpointsinchart) {
-      transform = `translate(-${pointsaddedtochart - maxpointsinchart},0)`
-      xline.points.removeItem(0);
-      yline.points.removeItem(0);
-      zline.points.removeItem(0);
-    }
-    let point = charts.createSVGPoint();
-
-    point.y = 40 + (15 * x);
-    point.x = pointsaddedtochart;
-    xline.points.appendItem(point);
-    xline.setAttribute("transform", transform)
-
-    point = charts.createSVGPoint();
-    point.y = 80 + (15 * y);
-    point.x = pointsaddedtochart;
-    yline.points.appendItem(point);
-    yline.setAttribute("transform", transform)
-
-    point = charts.createSVGPoint();
-    point.y = 120 + (15 * z);
-    point.x = pointsaddedtochart;
-    zline.points.appendItem(point);
-    zline.setAttribute("transform", transform)
-    pointsaddedtochart += 1
-  }
-
-
-  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-  } else {
-    setError("This page is only tested on mobile, beware!")
-  }
-  let [IDLE, STARTING_RECORDING, RECORDING, STOPPING, DOWNLOADING, RESETTING, LOADING] = [1, 2, 3, 4, 5, 6, 7]
-
-  const setStatus = (status) => {
-    switch (status) {
-      case LOADING:
-        stopbutton.setAttribute("disabled", "")
-        recordbutton.setAttribute("disabled", "")
-        downloadButton.setAttribute("disabled", "")
-        loadingElem.classList.remove("fadeoutfast");
-
-        void loadingElem.offsetWidth;
-
-        // -> and re-adding the class
-        break;
-      case IDLE:
-        stopbutton.removeAttribute("disabled")
-        stopbutton.setAttribute("hidden", "")
-        recordbutton.removeAttribute("disabled")
-        recordbutton.removeAttribute("hidden")
-        loadingElem.classList.add("fadeoutfast");
-
-        if (numberOfSamples > 0) {
-          downloadButton.removeAttribute("disabled")
-          resetButton.removeAttribute("disabled")
-        }
-        break;
-      case STARTING_RECORDING:
-        recordbutton.setAttribute("disabled", "")
-        downloadButton.setAttribute("disabled", "")
-        break;
-      case RECORDING:
-        recordbutton.setAttribute("hidden", "")
-        stopbutton.removeAttribute("hidden")
-        break;
-      case STOPPING:
-        stopbutton.setAttribute("disabled", "")
-        loadingElem.classList.remove("fadeoutfast");
-
-        void loadingElem.offsetWidth;
-        break;
-      case DOWNLOADING:
-        downloadButton.setAttribute("disabled", "")
-        recordbutton.setAttribute("disabled", "")
-        loadingElem.classList.remove("fadeoutfast");
-
-        void loadingElem.offsetWidth;
-        break;
-      case RESETTING:
-        downloadButton.setAttribute("disabled", "")
-        recordbutton.setAttribute("disabled", "")
-        resetButton.setAttribute("disabled", "")
-        break;
-    }
-  }
-  const stopRecording = () => {
-    setStatus(STOPPING)
-    accelerometer && accelerometer.stop()
-    setStatus(IDLE)
-
-  }
-  const startRecording = () => {
-    console.log("mono", monotoggle.checked)
-
-    setStatus(STARTING_RECORDING)
-    console.log("startrecording", Accelerometer)
-    if (typeof Accelerometer !== "function") {
-      setError("you dont have  accelerometer")
-      setStatus(IDLE)
-      return
-
-    }
-    addEntry(new Date().getTime(), Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1)
-
-    accelerometer = new LinearAccelerationSensor({ frequency: sampleRateAccel });
-    accelerometer.addEventListener("activate", (event) => {
-      setStatus(RECORDING)
-    })
-
-    accelerometer.addEventListener("error", (event) => {
-      // Handle runtime errors.
-      if (event.error.name === "NotAllowedError") {
-        navigator.permissions.query({ name: "accelerometer" }).then((result) => {
-          if (result.state === "denied") {
-            console.log("Permission to use accelerometer sensor is denied.");
-            return;
-          }
-        })
-        // Branch to code for requesting permission.
-      } else if (event.error.name === "NotReadableError") {
-        setError("Cannot connect to the sensor");
-      }
-      setStatus(IDLE)
-    });
-    accelerometer.addEventListener("reading", (e) => {
-      addEntry(e.timeStamp, accelerometer.x, accelerometer.y, accelerometer.z)
-    })
-    accelerometer.start()
-  }
-
-  const download = async () => {
-    setStatus(DOWNLOADING)
-    const db = await idb.openDB('infrasound', 1)
-    const numberOfSamples = await db.count("samples")
-    const tx = db.transaction('samples');
-
-    const writer = createwave(monotoggle.checked, numberOfSamples)
-    let wav
-    for await (const cursor of tx.store) {
-      const val = cursor.value
-      const x = mapRange(val.x, -max_seen_speed, max_seen_speed, -0.95, 0.95)
-      const y = mapRange(val.y, -max_seen_speed, max_seen_speed, -0.95, 0.95)
-      const z = mapRange(val.z, -max_seen_speed, max_seen_speed, -0.95, 0.95)
-      wav = writer(x,y,z)
-    }
-    await tx.done
-    let downloadLink = document.createElement('a');
-
-    downloadLink.href = URL.createObjectURL(wav)
-    const d = new Date()
-    const filename = `accelerosound.${d.toISOString()}.wav`
-    downloadLink.text = filename
-    downloadLink.setAttribute('download', filename) // name file
-    downloadLink.removeAttribute('disabled');
-    downloadLink.click()
-    setStatus(IDLE)
-
-  }
-
-  const createwave = (mono, numberOfFrames) => {
-    const sampleRate = sampleRateWav
-    const numberOfChannels = mono ? 1 : 3;
-
-    function setString(offset, value) {
-      for (let p = 0; p < value.length; p++) {
-        dataView.setUint8(offset + p, value.charCodeAt(p));
-      }
-    }
-    if (numberOfChannels < 1) {
-      throw new Error("No audio channels.");
-    }
-    const bitsPerSample = 32;
-    const formatCode = 3; // WAVE_FORMAT_IEEE_FLOAT
-    const fmtChunkSize = 18;
-    const bytesPerSample = Math.ceil(bitsPerSample / 8);
-    const bytesPerFrame = numberOfChannels * bytesPerSample;
-    const bytesPerSec = sampleRate * numberOfChannels * bytesPerSample;
-    const headerLength = 20 + fmtChunkSize + 8;
-    const sampleDataLength = numberOfChannels * numberOfFrames * bytesPerSample;
-    const fileLength = headerLength + sampleDataLength;
-    const arrayBuffer = new ArrayBuffer(fileLength);
-    const dataView = new DataView(arrayBuffer);
-    setString(0, "RIFF");                                // chunk ID
-    dataView.setUint32(4, fileLength - 8, true);         // chunk size
-    setString(8, "WAVE");                                // WAVEID
-    setString(12, "fmt ");                               // chunk ID
-    dataView.setUint32(16, fmtChunkSize, true);          // chunk size
-    dataView.setUint16(20, formatCode, true);            // wFormatTag
-    dataView.setUint16(22, numberOfChannels, true);      // nChannels
-    dataView.setUint32(24, sampleRate, true);            // nSamplesPerSec
-    dataView.setUint32(28, bytesPerSec, true);           // nAvgBytesPerSec
-    dataView.setUint16(32, bytesPerFrame, true);         // nBlockAlign
-    dataView.setUint16(34, bitsPerSample, true);         // wBitsPerSample
-    if (fmtChunkSize > 16) {
-      dataView.setUint16(36, 0, true);
-    }                // cbSize (extension size)
-    const p = 20 + fmtChunkSize;
-    setString(p, "data");                                // chunk ID
-    dataView.setUint32(p + 4, sampleDataLength, true);
-
-
-    let offs = headerLength;
-    let frameNo = 0
-    return (x, y, z) => {
-      if (mono) {
-        const mono_val = (x + y + z) / 3
-        dataView.setFloat32(offs, Math.fround(mono_val), true);
-        offs += 4;
-      } else {
-        dataView.setFloat32(offs, Math.fround(x), true);
-        offs += 4;
-        dataView.setFloat32(offs, Math.fround(y), true);
-        offs += 4;
-        dataView.setFloat32(offs, Math.fround(z), true);
-        offs += 4;
-      }
-      frameNo += 1
-
-      if (frameNo >= numberOfFrames) {
-        return new Blob([dataView], { type: 'audio/wav' });
-      }
-    }
-  }
-
-</script>
+<script src="./static/main.js"></script>
 
 </html>

@@ -462,8 +462,7 @@ const createwave = (mono, numberOfFrames) => {
     let frameNo = 0
     return (x, y, z) => {
         if (mono) {
-            const mono_val = (x + y + z) / 3
-            dataView.setFloat32(offs, Math.fround(mono_val), true);
+            dataView.setFloat32(offs, Math.fround(x), true);
             offs += 4;
         } else {
             dataView.setFloat32(offs, Math.fround(x), true);

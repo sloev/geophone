@@ -41,7 +41,7 @@ const recordbutton = document.getElementById("stopped")
 const errorElement = document.getElementById("error")
 const sampleRateAccel = 60
 const graceperiodSeconds = 5
-const sampleRateWav = 8200
+const sampleRateWav = 8000
 let accelerometer
 let numberOfSamples = 0
 let wav = undefined
@@ -257,9 +257,6 @@ const setStatus = (status) => {
                     generateButton.setAttribute("disabled", "")
                     downloadButton.removeAttribute("hidden")
                     downloadButton.removeAttribute("disabled")
-
-
-
                 } else {
                     generateButton.removeAttribute("disabled")
                     generateButton.removeAttribute("hidden")
@@ -305,6 +302,7 @@ const setStatus = (status) => {
 }
 const stopRecording = () => {
     setStatus(STOPPING)
+    wav = undefined
     accelerometer && accelerometer.stop()
     setStatus(IDLE)
 
@@ -403,15 +401,10 @@ const generate = async () => {
         wav = writer(x, y, z)
     }
     await tx.done
-    if (monotoggle.checked) {
         audioElem.src = URL.createObjectURL(wav)
         audioElem.load()
         audioElem.style.visibility = "visible"
-    } else {
-        audioElem.src = ""
-        audioElem.style.visibility = "hidden"
-
-    }
+   
     setStatus(IDLE)
 
 }

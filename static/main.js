@@ -200,6 +200,8 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 
 monotoggle.addEventListener('change', (event) => {
     wav = undefined
+    audioElem.stop()
+
     generateButton.removeAttribute("disabled")
     generateButton.removeAttribute("hidden")
     downloadButton.setAttribute("hidden", "")

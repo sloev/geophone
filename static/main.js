@@ -136,6 +136,7 @@ const addEntry = async (timestamp, x, y, z) => {
 const reset = async () => {
     setStatus(RESETTING)
     wav = undefined
+    audioElem.stop()
     try {
         const db = await idb.openDB('geophone', 1)
         await db.clear('samples');
@@ -310,6 +311,8 @@ const stopRecording = () => {
 const startRecording = () => {
     enableNoSleep()
     wav = undefined
+    audioElem.stop()
+
     ringbuffer.length = 0
 
     setStatus(STARTING_RECORDING)
@@ -386,7 +389,10 @@ const startRecordingMode = () => {
 
 
 const generate = async () => {
+
     setStatus(GENERATING)
+    audioElem.stop()
+
     setStatus(LOADING)
     const db = await idb.openDB('geophone', 1)
     const numberOfSamples = await db.count("samples")
@@ -401,10 +407,10 @@ const generate = async () => {
         wav = writer(x, y, z)
     }
     await tx.done
-        audioElem.src = URL.createObjectURL(wav)
-        audioElem.load()
-        audioElem.style.visibility = "visible"
-   
+    audioElem.src = URL.createObjectURL(wav)
+    audioElem.load()
+    audioElem.style.visibility = "visible"
+
     setStatus(IDLE)
 
 }
